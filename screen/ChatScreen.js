@@ -1,23 +1,10 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Alert, LogBox, StyleSheet, Text, View } from "react-native";
 import { GiftedChat } from "react-native-gifted-chat";
-import firebase from "firebase";
+import firebase from "../firebase";
 
-var firebaseConfig = {
-  apiKey: "AIzaSyAHbhO19nd_wSN93fzYyJYwAnmlxhG1-dQ",
-  authDomain: "chatbot-placeholder.firebaseapp.com",
-  databaseURL: "https://chatbot-placeholder.firebaseio.com",
-  projectId: "chatbot-placeholder",
-  storageBucket: "chatbot-placeholder.appspot.com",
-  messagingSenderId: "281623463894",
-  appId: "1:281623463894:web:f4296fe7ce4d649873c677",
-};
-
-if (firebase.apps.length === 0) {
-  var firebase_init = firebase.initializeApp(firebaseConfig);
-  var messagesRef = firebase_init.database().ref("/messages");
-  var recordsRef = firebase_init.database().ref("/records");
-}
+const messagesRef = firebase.database().ref("/messages");
+const recordsRef = firebase.database().ref("/records");
 
 LogBox.ignoreLogs(["Setting a timer for a long period of time"]);
 
@@ -30,7 +17,7 @@ export default function ChatScreen({ route }) {
     messagesRef.push(JSON.stringify(message_user));
     let text_user = message_user["text"];
     console.log("User: " + text_user);
-    fetch("http://df9b91727c4f.ngrok.io/predict", {
+    fetch("https://test-heroku-chatbot.herokuapp.com/predict", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -46,6 +33,7 @@ export default function ChatScreen({ route }) {
         recordsRef.push({
           _user: text_user,
           bot: text_bot,
+          time: `${new Date()}`,
         });
       })
       .catch((error) => {
@@ -57,8 +45,6 @@ export default function ChatScreen({ route }) {
     messagesRef.on("value", (snapshot) => {
       var arrMessages = [];
       snapshot.forEach((childSnapshot) => {
-        //console.log("Doc du lieu cac child");
-        //var childKey = childSnapshot.key;
         var childData = childSnapshot.val();
         arrMessages.unshift(JSON.parse(childData));
       });
@@ -95,6 +81,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
-    paddingHorizontal: 5,
   },
 });
