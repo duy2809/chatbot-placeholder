@@ -1,47 +1,70 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Alert, LogBox, StyleSheet, Text, View } from "react-native";
+
 import { GiftedChat } from "react-native-gifted-chat";
+import { dialogflowConfig } from "../env";
+import { Dialogflow_V2 } from "react-native-dialogflow";
 import firebase from "../firebase";
+import uuid from "uuid";
 
-const messagesRef = firebase.database().ref("/messages");
-const recordsRef = firebase.database().ref("/records");
-
+const messagesRef = firebase.database().ref("/test");
 LogBox.ignoreLogs(["Setting a timer for a long period of time"]);
 
 export default function ChatScreen({ route }) {
   const [messages, setMessages] = useState([]);
   const { username } = route.params;
 
+  const showResponse = (text, payload) => {
+    let msg = {
+      _id: uuid(),
+      text,
+      createdAt: new Date(),
+      user: {
+        _id: "2",
+        name: "Placeholder",
+        avatar: "https://image.flaticon.com/icons/png/512/2040/2040946.png",
+      },
+    };
+    // if (payload && payload.is_url) {
+    //   msg.text = "image";
+    //   msg.image = text;
+    // }
+    //console.log(msg);
+    messagesRef.push(JSON.stringify(msg));
+  };
+
+  const handleResponse = (result) => {
+    let text = result.queryResult.fulfillmentText;
+    // console.log(text);
+    let payload = result.queryResult.fulfillmentMessages;
+    let confidence = Math.round(
+      result.queryResult.intentDetectionConfidence * 100
+    );
+    let intent_name = result.queryResult.intent["displayName"];
+    Alert.alert(`Intent: ${intent_name} Độ tự tin ${confidence}%`);
+    showResponse(text, payload);
+  };
+
   const onSend = useCallback((messages = []) => {
     let message_user = messages[0];
     messagesRef.push(JSON.stringify(message_user));
     let text_user = message_user["text"];
-    console.log("User: " + text_user);
-    fetch("https://test-heroku-chatbot.herokuapp.com/predict", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(messages[0]),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        let text_bot = data["text"];
-        console.log("Bot: " + text_bot);
-        messagesRef.push(JSON.stringify(data));
-        recordsRef.push({
-          _user: text_user,
-          bot: text_bot,
-          time: `${new Date()}`,
-        });
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+    // console.log(text_user);
+    Dialogflow_V2.requestQuery(
+      text_user,
+      (result) => handleResponse(result),
+      (error) => console.log(error)
+    );
   }, []);
 
   useEffect(() => {
+    Dialogflow_V2.setConfiguration(
+      dialogflowConfig.client_email,
+      dialogflowConfig.private_key,
+      Dialogflow_V2.LANG_ENGLISH_US,
+      dialogflowConfig.project_id
+    );
+
     messagesRef.on("value", (snapshot) => {
       var arrMessages = [];
       snapshot.forEach((childSnapshot) => {
@@ -55,7 +78,7 @@ export default function ChatScreen({ route }) {
           name: "Placeholder",
           avatar: "https://image.flaticon.com/icons/png/512/2040/2040946.png",
         },
-        _id: 1,
+        _id: 0,
       });
       setMessages(arrMessages);
     });
