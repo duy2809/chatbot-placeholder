@@ -79,6 +79,32 @@ export default function ChatScreen({ route }) {
           avatar: "https://image.flaticon.com/icons/png/512/2040/2040946.png",
         },
         _id: 0,
+        quickReplies: {
+          type: "radio", // or 'checkbox',
+          keepIt: false,
+          values: [
+            {
+              _id: 1,
+              title: "Thông tin người dùng",
+              value: "thong_tin_nguoi_dung",
+            },
+            {
+              _id: 2,
+              title: "Các chỉ số cơ thể",
+              value: "cac_chi_so_co_the",
+            },
+            {
+              _id: 3,
+              title: "Hôm nay ăn gì?",
+              value: "hom_nay_an_gi",
+            },
+            {
+              _id: 4,
+              title: "Q&A bình thường",
+              value: "Q&A",
+            },
+          ],
+        },
       });
       setMessages(arrMessages);
     });
@@ -95,6 +121,19 @@ export default function ChatScreen({ route }) {
         user={{
           _id: 1,
         }}
+        onQuickReply={(reply) => {
+          console.log(reply[0]);
+          let { title, value } = reply[0];
+          let msg_rep = {
+            _id: uuid(),
+            createdAt: new Date(),
+            text: title,
+            user: {
+              _id: 1,
+            },
+          };
+          messagesRef.push(JSON.stringify(msg_rep));
+        }}
       />
     </View>
   );
@@ -104,5 +143,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
+    marginTop: 40,
   },
 });
