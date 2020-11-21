@@ -10,6 +10,7 @@ import {
   Day,
   MessageImage,
 } from "react-native-gifted-chat";
+import QuickReplies from "react-native-gifted-chat/lib/QuickReplies";
 
 export const renderBubble = (props) => {
   // const { currentMessage } = props;
@@ -21,7 +22,7 @@ export const renderBubble = (props) => {
       {...props}
       containerStyle={{
         left: { marginLeft: 5 },
-        right: { marginRight: 5 },
+        right: { marginRight: 2.5 },
       }}
       renderTime={() => <View></View>}
       wrapperStyle={{
@@ -119,6 +120,37 @@ export const renderDay = (props) => (
       fontSize: 14,
       fontFamily: "Quicksand-Light",
       color: "black",
+    }}
+  />
+);
+
+export const renderQuickReplies = (props) => (
+  <QuickReplies
+    {...props}
+    color="#1B4332"
+    quickReplyStyle={{
+      backgroundColor: "#F4F1DE",
+      // justifyContent: "center",
+      // alignItems: "center",
+      borderWidth: 0,
+      // fontSize: 100,
+      borderColor: "#F4F1DE",
+      // maxWidth: 200,
+      // paddingVertical: 7,
+      // paddingHorizontal: 12,
+      minHeight: 40,
+      marginRight: 10,
+      width: 80,
+      // borderRadius: 13,
+      // margin: 3,
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 5,
+      },
+      shadowOpacity: 0.34,
+      shadowRadius: 6.27,
+      elevation: 10,
     }}
   />
 );

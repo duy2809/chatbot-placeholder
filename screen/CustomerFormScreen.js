@@ -11,7 +11,6 @@ import {
 import { Button } from "react-native-elements";
 import { AppLoading } from "expo";
 import { useFonts } from "expo-font";
-import RNPickerSelect from "react-native-picker-select";
 import { Picker } from "@react-native-picker/picker";
 
 import RadioForm, {

@@ -6,6 +6,7 @@ import {
   Image,
   StyleSheet,
   ImageBackground,
+  ActivityIndicator,
 } from "react-native";
 import { GiftedChat } from "react-native-gifted-chat";
 import initialMessages from "./messages";
@@ -23,9 +24,11 @@ import {
   renderMessageText,
   renderCustomView,
   renderDay,
+  renderQuickReplies,
 } from "./MessageContainer";
 import { AppLoading } from "expo";
 import { useFonts } from "expo-font";
+import uuid from "uuid";
 
 export default function ChatScreen({ route, navigation }) {
   const { name, age, gender, height, weight, activity } = route.params;
@@ -62,6 +65,24 @@ export default function ChatScreen({ route, navigation }) {
     setMessages((prevMessages) => GiftedChat.append(prevMessages, newMessages));
   };
 
+  const onQuickReply = (newMessages = []) => {
+    console.log(newMessages);
+    let reply = newMessages[0];
+    let title = reply["title"];
+    let msg = {
+      _id: uuid(),
+      createdAt: new Date(),
+      user: {
+        _id: 1,
+        name: "React Native",
+        avatar: "https://i.imgur.com/Nyp4fGI.png",
+      },
+      text: title,
+    };
+    let newMsg = [msg];
+    setMessages((prevMessages) => GiftedChat.append(prevMessages, newMsg));
+  };
+
   let [fontsLoaded] = useFonts({
     "Quicksand-Medium": require("../assets/fonts/Quicksand-Medium.ttf"),
     "Quicksand-Light": require("../assets/fonts/Quicksand-Light.ttf"),
@@ -80,7 +101,7 @@ export default function ChatScreen({ route, navigation }) {
             messages={messages}
             text={text}
             onInputTextChanged={setText}
-            onSend={(value) => console.log(value)}
+            onSend={onSend}
             user={{
               _id: 1,
               name: "Aaron",
@@ -107,7 +128,7 @@ export default function ChatScreen({ route, navigation }) {
             //   renderMessage={renderMessage} // Tính năng QUAN TRỌNG chỉnh hiển thị ngày
             renderMessageText={renderMessageText} // Tính năng QUAN TRỌNG
             // renderCustomView={renderCustomView}
-            // renderQuickReplies // Tính năng QUAN TRỌNG
+            renderQuickReplies={renderQuickReplies} // Tính năng QUAN TRỌNG
             // isCustomViewBottom
             //   messagesContainerStyle={{ backgroundColor: "indigo" }} // Tính năng QUAN TRỌNG
             //   parsePatterns={(linkStyle) => [
@@ -117,7 +138,10 @@ export default function ChatScreen({ route, navigation }) {
             //       onPress: (tag) => console.log(`Pressed on hashtag: ${tag}`),
             //     },
             //   ]}
-            onQuickReply={(value) => console.log(value)}
+            renderLoading={() => (
+              <ActivityIndicator size="large" color="#0000ff" />
+            )}
+            onQuickReply={onQuickReply}
             renderDay={renderDay}
           />
         </ImageBackground>

@@ -29,6 +29,7 @@ import {
   renderBubble,
   renderDay,
   renderMessageText,
+  renderQuickReplies,
 } from "../custom/MessageContainer";
 import { AppLoading } from "expo";
 import { useFonts } from "expo-font";
@@ -111,16 +112,40 @@ export default function ChatScreen({ route, navigation }) {
     messagesRef.push(JSON.stringify(msg));
   };
 
+  const showResponseQuickReply = (listBtn) => {
+    let msg = {
+      _id: uuid(),
+      createdAt: new Date(),
+      user: {
+        _id: "2",
+        name: "Placeholder",
+        avatar: "https://i.imgur.com/Nyp4fGI.png",
+      },
+      quickReplies: {
+        type: "radio", // or 'checkbox',
+        keepIt: true,
+        values: listBtn,
+      },
+    };
+    messagesRef.push(JSON.stringify(msg));
+  };
+
   const handleResponse = (result) => {
-    console.log(result);
+    // console.log(result);
     let fulfillMessages = result.queryResult.fulfillmentMessages;
-    let image;
+    let image, listBtn;
     fulfillMessages.forEach((obj) => {
       if (!obj["platform"]) {
         if (obj["payload"]) {
-          image = obj["payload"]["image"];
-          showResponseImage(image);
-        } else image = null;
+          if (obj["payload"]["image"]) {
+            image = obj["payload"]["image"];
+            showResponseImage(image);
+          } else if (obj["payload"]["quickReplies"]) {
+            listBtn = obj["payload"]["quickReplies"];
+            showResponseQuickReply(listBtn);
+            // console.log(listBtn);
+          }
+        } // else image = null;
         if (obj["text"]) {
           let text_bot = obj["text"]["text"][0];
           // console.log(text_bot);
@@ -128,10 +153,10 @@ export default function ChatScreen({ route, navigation }) {
         }
       }
     });
-    let confidence = Math.round(
-      result.queryResult.intentDetectionConfidence * 100
-    );
-    let intent_name = result.queryResult.intent["displayName"];
+    //let confidence = Math.round(
+    // result.queryResult.intentDetectionConfidence * 100
+    // );
+    // let intent_name = result.queryResult.intent["displayName"];
     // Alert.alert(`Intent: ${intent_name} \n Độ tự tin ${confidence}%`);
   };
 
@@ -146,6 +171,28 @@ export default function ChatScreen({ route, navigation }) {
       (error) => console.log(error)
     );
   }, []);
+
+  const onQuickReply = (replies = []) => {
+    let reply = replies[0];
+    let title = reply["title"];
+    let value = reply["value"];
+    let msg = {
+      _id: uuid(),
+      createdAt: new Date(),
+      user: {
+        _id: 1,
+        name: "React Native",
+        avatar: "https://i.imgur.com/Nyp4fGI.png",
+      },
+      text: title,
+    };
+    messagesRef.push(JSON.stringify(msg));
+    Dialogflow_V2.requestQuery(
+      value,
+      (result) => handleResponse(result),
+      (error) => console.log(error)
+    );
+  };
 
   useEffect(() => {
     console.log(name, age, gender, weight, height, activity);
@@ -220,19 +267,7 @@ export default function ChatScreen({ route, navigation }) {
             user={{
               _id: 1,
             }}
-            onQuickReply={(reply) => {
-              console.log(reply[0]);
-              let { title, value } = reply[0];
-              let msg_rep = {
-                _id: uuid(),
-                createdAt: new Date(),
-                text: title,
-                user: {
-                  _id: 1,
-                },
-              };
-              messagesRef.push(JSON.stringify(msg_rep));
-            }}
+            onQuickReply={(replies) => onQuickReply(replies)}
             placeholder="Nhấn để trò chuyện ..."
             alwaysShowSend
             scrollToBottom
@@ -246,6 +281,7 @@ export default function ChatScreen({ route, navigation }) {
             renderBubble={renderBubble}
             renderMessageText={renderMessageText}
             renderDay={renderDay}
+            renderQuickReplies={renderQuickReplies}
           />
         </ImageBackground>
       </View>

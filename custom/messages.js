@@ -40,16 +40,16 @@ const messages = [
       keepIt: true,
       values: [
         {
-          title: "😋 Yes",
-          value: "yes",
+          title: "Sáng",
+          value: "Sáng",
         },
         {
-          title: "📷 Yes, let me show you with a picture!",
-          value: "yes_picture",
+          title: "Trưa",
+          value: "Trưa",
         },
         {
-          title: "😞 Nope. What?",
-          value: "no",
+          title: "Tối",
+          value: "Tối",
         },
       ],
     },
@@ -65,6 +65,7 @@ const messages = [
     },
     quickReplies: {
       type: "checkbox", // or 'radio',
+      keepIt: true,
       values: [
         {
           title: "Yes",
