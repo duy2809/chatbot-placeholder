@@ -1,26 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
   Image,
-  ImageBackground,
   Text,
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import { Button } from "react-native-elements";
+
 import { AppLoading } from "expo";
 import { useFonts } from "expo-font";
 import { Picker } from "@react-native-picker/picker";
 
-import RadioForm, {
-  RadioButton,
-  RadioButtonInput,
-  RadioButtonLabel,
-} from "react-native-simple-radio-button";
-import { color } from "react-native-reanimated";
-// import Slider from "react-native-slider";
-// import { CheckBox } from "react-native-elements";
+import RadioForm from "react-native-simple-radio-button";
 
 const radio_props = [
   { label: "1", value: 1 },
@@ -49,7 +41,6 @@ export default function CustomerFormScreen({ route, navigation }) {
   const [weight, setWeight] = useState(50);
   const [height, setHeight] = useState(1.53);
   const [activity, setActivity] = useState(3);
-  // console.log(`State: ${gender} and ${typeof gender}`);
 
   let [fontsLoaded] = useFonts({
     "Quicksand-SemiBold": require("../assets/fonts/Quicksand-SemiBold.ttf"),
@@ -59,8 +50,6 @@ export default function CustomerFormScreen({ route, navigation }) {
     return <AppLoading />;
   } else {
     const { name } = route.params;
-    // console.log(name, age, gender, height, weight, activity);
-    // console.log("Vào trang Customer Form");
     return (
       <View style={styles.container}>
         <View style={styles.mainForm}>
@@ -72,9 +61,7 @@ export default function CustomerFormScreen({ route, navigation }) {
           </View>
           <View
             style={{
-              // backgroundColor: "lightgreen",
               width: "50%",
-              // marginLeft: "5%",
               alignItems: "center",
             }}
           >
@@ -98,11 +85,8 @@ export default function CustomerFormScreen({ route, navigation }) {
                     marginLeft: 5,
                     height: 45,
                     width: 100,
-                    // fontSize: 30,
                     color: "white",
                     alignItems: "center",
-                    // fontFamily: "Quicksand-SemiBold",
-                    // backgroundColor: "red",
                   }}
                   onValueChange={(itemValue, itemIndex) => {
                     setGender(itemValue);
@@ -137,11 +121,8 @@ export default function CustomerFormScreen({ route, navigation }) {
                     marginLeft: 5,
                     height: 45,
                     width: 100,
-                    // fontSize: 30,
                     color: "white",
                     alignItems: "center",
-                    // fontFamily: "Quicksand-SemiBold",
-                    // backgroundColor: "red",
                   }}
                   onValueChange={(itemValue, itemIndex) => {
                     setAge(itemValue);
@@ -164,7 +145,6 @@ export default function CustomerFormScreen({ route, navigation }) {
                 Cân nặng
               </Text>
               <View style={[styles.section, { position: "relative" }]}>
-                {/* <MeterialIcons name="person" size={25} /> */}
                 <Text
                   style={[
                     styles.textBtn,
@@ -198,7 +178,6 @@ export default function CustomerFormScreen({ route, navigation }) {
                   { width: "100%", position: "relative" },
                 ]}
               >
-                {/* <MeterialIcons name="person" size={25} /> */}
                 <Text
                   style={[
                     styles.textBtn,
@@ -210,13 +189,13 @@ export default function CustomerFormScreen({ route, navigation }) {
                     },
                   ]}
                 >
-                  M
+                  Cm
                 </Text>
                 <TextInput
-                  placeholder="1.53"
+                  placeholder="153"
                   style={styles.textInput}
                   placeholderTextColor="white"
-                  onChangeText={(value) => setHeight(value)}
+                  onChangeText={(value) => setHeight(value / 100)}
                   keyboardType="decimal-pad"
                 />
               </View>
@@ -266,11 +245,9 @@ export default function CustomerFormScreen({ route, navigation }) {
             paddingTop: 20,
           }}
           style={{
-            // backgroundColor: "red",
             width: 275,
             justifyContent: "space-between",
           }}
-          // buttonColor={"black"}
         />
         <TouchableOpacity
           style={[styles.button, styles.shadowStyle]}

@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, Image, ImageBackground, Text } from "react-native";
+import { StyleSheet, View, ImageBackground, Text } from "react-native";
 import { Button } from "react-native-elements";
 import { AppLoading } from "expo";
 import { useFonts } from "expo-font";
@@ -52,7 +52,6 @@ const styles = StyleSheet.create({
 
   quote: {
     flex: 2 / 3,
-    // backgroundColor: "red",
     justifyContent: "center",
   },
 

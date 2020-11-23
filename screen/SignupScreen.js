@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { StyleSheet, View, Text, TextInput } from "react-native";
-import { Button, Input, Icon } from "react-native-elements";
+import { Button, Icon } from "react-native-elements";
 import { AppLoading } from "expo";
 import { useFonts } from "expo-font";
-// import { TextInput } from "react-native-paper";
 import MeterialIcons from "react-native-vector-icons/MaterialIcons";
 
 export default function SignupScreen({ navigation }) {
@@ -21,55 +20,7 @@ export default function SignupScreen({ navigation }) {
         <View style={styles.header}>
           <Text style={styles.title}>Tạo tài khoản,</Text>
           <Text style={styles.subtitle}>Bắt đầu hành trình!</Text>
-
-          {/* <View style={styles.inputContainer}>
-            <TextInput
-              label="Fullname"
-              style={styles.input}
-              mode="outlined"
-              //   value={text}
-              //   onChangeText={(text) => setText(text)}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <TextInput
-              label="Email"
-              style={styles.input}
-              mode="outlined"
-              theme={{}}
-              //   value={text}
-              //   onChangeText={(text) => setText(text)}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <TextInput
-              label="Password"
-              style={styles.input}
-              mode="outlined"
-              //   value={text}
-              //   onChangeText={(text) => setText(text)}
-            />
-          </View> */}
         </View>
-        {/* <Input
-          placeholder="Email"
-          leftIcon={{ type: "font-awesome", name: "envelope" }}
-          leftIconContainerStyle={styles.icon}
-          containerStyle={styles.inputContainer}
-          inputContainerStyle={styles.textInput}
-          //   onChangeText={(value) => this.setState({ comment: value })}
-        />
-
-        <Input
-          placeholder="Password"
-          leftIcon={{ type: "font-awesome", name: "lock" }}
-          leftIconContainerStyle={styles.icon}
-          containerStyle={styles.inputContainer}
-          inputContainerStyle={styles.textInput}
-          //   onChangeText={(value) => this.setState({ comment: value })}
-        /> */}
         <View style={styles.form}>
           <View style={styles.section}>
             <MeterialIcons name="person" size={25} />
@@ -166,13 +117,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  input: {
-    // width: "85%",
-    // borderWidth: 2,
-    // borderRadius: 10,
-    // marginBottom: 20,
-  },
-
   icon: {
     paddingRight: 15,
   },
@@ -197,14 +141,12 @@ const styles = StyleSheet.create({
   },
 
   groupBtn: {
-    // backgroundColor: "pink",
     marginBottom: 50,
   },
 
   button: {
     backgroundColor: "#9D0208",
     borderRadius: 15,
-    // width: "100%",
     height: 55,
     marginBottom: 20,
   },

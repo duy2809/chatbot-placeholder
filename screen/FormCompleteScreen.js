@@ -7,7 +7,6 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
-import { Button } from "react-native-elements";
 import { AppLoading } from "expo";
 import { useFonts } from "expo-font";
 import {
@@ -30,7 +29,7 @@ export default function FormCompleteScreen({ route, navigation }) {
     const bmr = bmrCalculator(weight, height, gender, age);
     const classification = bmiClassify(bmi);
     const tdee = tdeeCalculator(bmr, activity);
-    console.log(bmi, bmr, classification, tdee);
+
     return (
       <View style={styles.container}>
         <ImageBackground
@@ -43,7 +42,6 @@ export default function FormCompleteScreen({ route, navigation }) {
               style={styles.logo}
             />
             <View>
-              {/* <Text style={styles.textTitleBox}>Chào mừng bạn</Text> */}
               <Text style={styles.textSubtitleBox}>
                 Cảm ơn bạn đã hoàn thành khảo sát !
               </Text>
@@ -70,27 +68,6 @@ export default function FormCompleteScreen({ route, navigation }) {
               </Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={[styles.button, styles.shadowStyle]}
-            onPress={() =>
-              navigation.navigate("TestChat", {
-                name,
-                age,
-                gender,
-                weight,
-                height,
-                activity,
-                bmi,
-                bmr,
-                classification,
-                tdee,
-              })
-            }
-          >
-            <Text style={[styles.textBtn, , { textAlign: "center" }]}>
-              Test giao diện tin nhắn
-            </Text>
-          </TouchableOpacity>
         </ImageBackground>
       </View>
     );

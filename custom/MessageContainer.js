@@ -1,22 +1,9 @@
-/* eslint-disable react/jsx-props-no-spreading */
 import React from "react";
-import { View, Text, ScrollView } from "react-native";
-import {
-  Avatar,
-  Bubble,
-  SystemMessage,
-  Message,
-  MessageText,
-  Day,
-  MessageImage,
-} from "react-native-gifted-chat";
+import { View } from "react-native";
+import { Bubble, MessageText, Day } from "react-native-gifted-chat";
 import QuickReplies from "react-native-gifted-chat/lib/QuickReplies";
 
 export const renderBubble = (props) => {
-  // const { currentMessage } = props;
-  // const { image } = currentMessage;
-  // console.log(image);
-  // if (!image)
   return (
     <Bubble
       {...props}
@@ -27,9 +14,6 @@ export const renderBubble = (props) => {
       renderTime={() => <View></View>}
       wrapperStyle={{
         left: {
-          // borderColor: "#F4F1DE",
-          // borderWidth: 4.5,
-          // borderRadius: 15,
           borderBottomLeftRadius: 5,
           shadowColor: "#000",
           shadowOffset: {
@@ -43,8 +27,6 @@ export const renderBubble = (props) => {
         },
         right: {
           backgroundColor: "#1B4332",
-          // borderColor: "#1B4332",
-          // borderWidth: 4.6,
           borderBottomRightRadius: 5,
           shadowColor: "#000",
           shadowOffset: {
@@ -58,26 +40,6 @@ export const renderBubble = (props) => {
       }}
     />
   );
-  // else
-  //   return (
-  //     <ScrollView
-  //       style={{
-  //         backgroundColor: "white",
-  //         height: 200,
-  //       }}
-  //       horizontal={true}
-  //     >
-  //       <Text>
-  //         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-  //         eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-  //         minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-  //         aliquip ex ea commodo consequat. Duis aute irure dolor in
-  //         reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-  //         pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-  //         culpa qui officia deserunt mollit anim id est laborum.
-  //       </Text>
-  //     </ScrollView>
-  //   );
 };
 
 export const renderMessageText = (props) => (
@@ -89,7 +51,6 @@ export const renderMessageText = (props) => (
     }}
     customTextStyle={{
       fontSize: 17,
-      // lineHeight: 20,
       fontFamily: "Quicksand-Medium",
     }}
   />
@@ -98,24 +59,6 @@ export const renderMessageText = (props) => (
 export const renderDay = (props) => (
   <Day
     {...props}
-    // containerStyle={{
-    //   borderBottomWidth: 2,
-    //   borderColor: "#9D0208",
-    //   borderStyle: "dashed",
-    //   // width: "70%",
-    //   alignItems: "center",
-    //   borderRadius: 1,
-    // }}
-    // wrapperStyle={{
-    //   borderBottomWidth: 1,
-    //   // borderTopColor: "black",
-    //   borderColor: "#9D0208",
-    //   borderStyle: "dashed",
-    //   width: "60%",
-    //   alignItems: "center",
-    //   borderRadius: 1,
-    //   paddingBottom: 5,
-    // }}
     textStyle={{
       fontSize: 14,
       fontFamily: "Quicksand-Light",
@@ -130,19 +73,12 @@ export const renderQuickReplies = (props) => (
     color="#1B4332"
     quickReplyStyle={{
       backgroundColor: "#F4F1DE",
-      // justifyContent: "center",
-      // alignItems: "center",
       borderWidth: 0,
-      // fontSize: 100,
       borderColor: "#F4F1DE",
-      // maxWidth: 200,
-      // paddingVertical: 7,
-      // paddingHorizontal: 12,
       minHeight: 40,
-      marginRight: 10,
-      width: 80,
-      // borderRadius: 13,
-      // margin: 3,
+      marginRight: 5,
+      maxWidth: "100%",
+      paddingHorizontal: 15,
       shadowColor: "#000",
       shadowOffset: {
         width: 0,

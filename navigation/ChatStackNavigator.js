@@ -1,5 +1,5 @@
 import React from "react";
-import { Image, StyleSheet, View, TouchableOpacity } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 
 import WelcomeScreen from "../screen/WelcomeScreen";
@@ -8,13 +8,11 @@ import SignupScreen from "../screen/SignupScreen";
 import SuccessScreen from "../screen/SuccessScreen";
 import CustomerFormScreen from "../screen/CustomerFormScreen";
 import FormCompleteScreen from "../screen/FormCompleteScreen";
-import TestChatScreen from "../custom/Chats";
 import ChatScreen from "../screen/ChatScreen";
-import { NavigationHelpersContext } from "@react-navigation/native";
 
 const Stack = createStackNavigator();
 
-export default function ChatStackNavigator({ navigation }) {
+export default function ChatStackNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -48,40 +46,6 @@ export default function ChatStackNavigator({ navigation }) {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="TestChat"
-        component={TestChatScreen}
-        options={{
-          headerShown: true,
-          headerStyle: {
-            backgroundColor: "#9D0208",
-          },
-          headerTitle: (props) => (
-            <View style={styles.container}>
-              <Image
-                source={require("../assets/pho_talk.png")}
-                style={styles.logo}
-              />
-            </View>
-          ),
-          headerLeft: null,
-          // headerRight: (props) => (
-          //   <TouchableOpacity
-          //     style={{
-          //       // borderColor: "black",
-          //       // borderWidth: 5,
-          //       marginRight: 15,
-          //     }}
-          //     // onPress={}
-          //   >
-          //     <Image
-          //       source={require("../assets/icon_user.png")}
-          //       style={styles.iconUser}
-          //     />
-          //   </TouchableOpacity>
-          // ),
-        }}
-      />
-      <Stack.Screen
         name="Chat"
         component={ChatScreen}
         options={{
@@ -106,8 +70,6 @@ export default function ChatStackNavigator({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    // borderWidth: 5,
-    // borderColor: "black",
     alignItems: "center",
     marginLeft: 50,
   },

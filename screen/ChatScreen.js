@@ -5,10 +5,8 @@ import React, {
   useLayoutEffect,
 } from "react";
 import {
-  Alert,
   LogBox,
   StyleSheet,
-  Text,
   View,
   TouchableOpacity,
   Image,
@@ -34,6 +32,9 @@ import {
 import { AppLoading } from "expo";
 import { useFonts } from "expo-font";
 
+import * as ImagePicker from "expo-image-picker";
+import axios from "axios";
+
 const messagesRef = firebase.database().ref("/test");
 LogBox.ignoreLogs(["Setting a timer for a long period of time"]);
 
@@ -51,26 +52,12 @@ export default function ChatScreen({ route, navigation }) {
     classification,
     tdee,
   } = route.params;
-  console.log(
-    name,
-    age,
-    gender,
-    height,
-    weight,
-    activity,
-    bmi,
-    bmr,
-    classification,
-    tdee
-  );
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity
           style={{
-            // borderColor: "black",
-            // borderWidth: 5,
             marginRight: 15,
           }}
           onPress={() => navigation.navigate("CustomerForm")}
@@ -112,6 +99,67 @@ export default function ChatScreen({ route, navigation }) {
     messagesRef.push(JSON.stringify(msg));
   };
 
+  const showResponseImageUser = (image) => {
+    let msg = {
+      _id: uuid(),
+      createdAt: new Date(),
+      user: {
+        _id: 1,
+        name: "React Native",
+        avatar: "https://i.imgur.com/Nyp4fGI.png",
+      },
+      image,
+    };
+    messagesRef.push(JSON.stringify(msg));
+  };
+
+  const postImageAPI = (image) => {
+    showResponseImageUser(image);
+    const formData = new FormData();
+    formData.append("file", {
+      uri: image,
+      type: "image/jpeg",
+      name: "image.jpg",
+    });
+    axios({
+      url: "https://detectfood.duyanh4.repl.co/predict",
+      method: "POST",
+      data: formData,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "multipart/form-data",
+      },
+    })
+      .then(function (response) {
+        const { data } = response;
+        const nameFood = data["name"];
+        const caloFood = data["calories"];
+        if (nameFood != "Error")
+          showResponseText(
+            `Trong ảnh là món ${nameFood} bạn nha! Trong 100g ${nameFood} có chứa ${caloFood} calories!`
+          );
+        else
+          showResponseText(
+            `Sorry bạn :( Mình không đoán được món trong ảnh rùi!`
+          );
+      })
+      .catch(function (error) {
+        showResponseText("Sorry bạn :( Ảnh của bạn chưa được gửi đi");
+      });
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    if (!result.cancelled) {
+      postImageAPI(result.uri);
+    }
+  };
+
   const showResponseQuickReply = (listBtn) => {
     let msg = {
       _id: uuid(),
@@ -122,7 +170,7 @@ export default function ChatScreen({ route, navigation }) {
         avatar: "https://i.imgur.com/Nyp4fGI.png",
       },
       quickReplies: {
-        type: "radio", // or 'checkbox',
+        type: "radio",
         keepIt: true,
         values: listBtn,
       },
@@ -131,7 +179,6 @@ export default function ChatScreen({ route, navigation }) {
   };
 
   const handleResponse = (result) => {
-    // console.log(result);
     let fulfillMessages = result.queryResult.fulfillmentMessages;
     let image, listBtn;
     fulfillMessages.forEach((obj) => {
@@ -143,28 +190,20 @@ export default function ChatScreen({ route, navigation }) {
           } else if (obj["payload"]["quickReplies"]) {
             listBtn = obj["payload"]["quickReplies"];
             showResponseQuickReply(listBtn);
-            // console.log(listBtn);
           }
-        } // else image = null;
+        }
         if (obj["text"]) {
           let text_bot = obj["text"]["text"][0];
-          // console.log(text_bot);
           showResponseText(text_bot);
         }
       }
     });
-    //let confidence = Math.round(
-    // result.queryResult.intentDetectionConfidence * 100
-    // );
-    // let intent_name = result.queryResult.intent["displayName"];
-    // Alert.alert(`Intent: ${intent_name} \n Độ tự tin ${confidence}%`);
   };
 
   const onSend = useCallback((messages = []) => {
     let message_user = messages[0];
     messagesRef.push(JSON.stringify(message_user));
     let text_user = message_user["text"];
-    // console.log(text_user);
     Dialogflow_V2.requestQuery(
       text_user,
       (result) => handleResponse(result),
@@ -195,8 +234,19 @@ export default function ChatScreen({ route, navigation }) {
   };
 
   useEffect(() => {
-    console.log(name, age, gender, weight, height, activity);
-    console.log("useEffect()");
+    (async () => {
+      if (Platform.OS !== "web") {
+        const {
+          status,
+        } = await ImagePicker.requestCameraRollPermissionsAsync();
+        if (status !== "granted") {
+          alert(
+            "Xin lỗi, mình cần quyền truy cập thư mục ảnh của bạn để có thể hoạt động đầy đủ tính năng!"
+          );
+        }
+      }
+    })();
+
     Dialogflow_V2.requestEvent(
       "WELCOME",
       {
@@ -282,6 +332,7 @@ export default function ChatScreen({ route, navigation }) {
             renderMessageText={renderMessageText}
             renderDay={renderDay}
             renderQuickReplies={renderQuickReplies}
+            onPressActionButton={pickImage}
           />
         </ImageBackground>
       </View>
