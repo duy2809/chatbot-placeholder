@@ -35,7 +35,7 @@ import { useFonts } from "expo-font";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 
-const messagesRef = firebase.database().ref("/test");
+const messagesRef = firebase.database().ref(`/${uuid()}`);
 LogBox.ignoreLogs(["Setting a timer for a long period of time"]);
 
 export default function ChatScreen({ route, navigation }) {
@@ -60,12 +60,9 @@ export default function ChatScreen({ route, navigation }) {
           style={{
             marginRight: 15,
           }}
-          onPress={() => navigation.navigate("CustomerForm")}
+          onPress={() => navigation.navigate("Profile", { bmi, bmr, tdee })}
         >
-          <Image
-            source={require("../assets/icon_user.png")}
-            style={styles.iconUser}
-          />
+          <Image source={require("../assets/icon_user.png")} />
         </TouchableOpacity>
       ),
     });

@@ -235,9 +235,7 @@ export default function CustomerFormScreen({ route, navigation }) {
           formHorizontal={true}
           labelHorizontal={false}
           buttonColor={"#9D0208"}
-          // labelColor={"white"}
           selectedButtonColor={"#9D0208"}
-          // animation={false}
           labelStyle={{
             color: "white",
             fontFamily: "Quicksand-SemiBold",

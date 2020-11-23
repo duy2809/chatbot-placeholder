@@ -9,6 +9,7 @@ import SuccessScreen from "../screen/SuccessScreen";
 import CustomerFormScreen from "../screen/CustomerFormScreen";
 import FormCompleteScreen from "../screen/FormCompleteScreen";
 import ChatScreen from "../screen/ChatScreen";
+import ProfileScreen from "../screen/ProfileScreen";
 
 const Stack = createStackNavigator();
 
@@ -48,6 +49,25 @@ export default function ChatStackNavigator() {
       <Stack.Screen
         name="Chat"
         component={ChatScreen}
+        options={{
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#9D0208",
+          },
+          headerTitle: (props) => (
+            <View style={styles.container}>
+              <Image
+                source={require("../assets/pho_talk.png")}
+                style={styles.logo}
+              />
+            </View>
+          ),
+          headerLeft: null,
+        }}
+      />
+      <Stack.Screen
+        name="Profile"
+        component={ProfileScreen}
         options={{
           headerShown: true,
           headerStyle: {

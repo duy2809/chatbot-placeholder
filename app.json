@@ -4,9 +4,9 @@
     "slug": "chatbot-placeholder",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon_pho_talk.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash_pho_talk.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
