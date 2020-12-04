@@ -1,5 +1,5 @@
 import React from "react";
-import { Image } from "react-native";
+import { Image, View, Text } from "react-native";
 import {
   InputToolbar,
   Actions,
@@ -36,7 +36,6 @@ export const renderActions = (props) => (
         source={require("../assets/icon_select_picture.png")}
       />
     )}
-    optionTintColor="#222B45"
   />
 );
 
@@ -49,7 +48,7 @@ export const renderComposer = (props) => (
       borderRadius: 15,
       paddingTop: 2,
       paddingHorizontal: 12,
-      marginLeft: 0,
+      marginLeft: 60,
       fontSize: 17,
       fontFamily: "Quicksand-Medium",
       shadowColor: "#000",

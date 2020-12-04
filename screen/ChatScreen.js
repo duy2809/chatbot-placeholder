@@ -11,12 +11,22 @@ import {
   TouchableOpacity,
   Image,
   ImageBackground,
+  ActivityIndicator,
 } from "react-native";
+
+import { FontAwesome } from "@expo/vector-icons";
+import { AppLoading } from "expo";
+import { useFonts } from "expo-font";
+import { Audio } from "expo-av";
+import * as ImagePicker from "expo-image-picker";
+import * as Permissions from "expo-permissions";
+import * as FileSystem from "expo-file-system";
 
 import { GiftedChat } from "react-native-gifted-chat";
 import { Dialogflow_V2 } from "react-native-dialogflow";
 import firebase from "../firebase";
 import uuid from "uuid";
+import axios from "axios";
 import {
   renderInputToolbar,
   renderActions,
@@ -29,17 +39,134 @@ import {
   renderMessageText,
   renderQuickReplies,
 } from "../custom/MessageContainer";
-import { AppLoading } from "expo";
-import { useFonts } from "expo-font";
 
-import * as ImagePicker from "expo-image-picker";
-import axios from "axios";
+const recordingOptions = {
+  android: {
+    extension: ".3gp",
+    outputFormat: Audio.RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_AMR_WB,
+    audioEncoder: Audio.RECORDING_OPTION_ANDROID_AUDIO_ENCODER_AMR_WB,
+    sampleRate: 16000,
+    numberOfChannels: 1,
+    bitRate: 128000,
+  },
+  ios: {
+    extension: ".wav",
+    audioQuality: Audio.RECORDING_OPTION_IOS_AUDIO_QUALITY_HIGH,
+    sampleRate: 44100,
+    numberOfChannels: 1,
+    bitRate: 128000,
+    linearPCMBitDepth: 16,
+    linearPCMIsBigEndian: false,
+    linearPCMIsFloat: false,
+  },
+};
 
 const messagesRef = firebase.database().ref(`/${uuid()}`);
 LogBox.ignoreLogs(["Setting a timer for a long period of time"]);
 
 export default function ChatScreen({ route, navigation }) {
   const [messages, setMessages] = useState([]);
+  const [typing, setTyping] = useState(false);
+  const [recording, setRecording] = useState(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+
+  const deleteRecordingFile = async () => {
+    try {
+      const info = await FileSystem.getInfoAsync(recording.getURI());
+      await FileSystem.deleteAsync(info.uri);
+    } catch (error) {
+      console.log("There was an error deleting recording file", error);
+    }
+  };
+
+  const getTranscription = async () => {
+    setIsFetching(true);
+    try {
+      const info = await FileSystem.getInfoAsync(recording.getURI());
+      // console.log(`FILE INFO: ${JSON.stringify(info)}`);
+      const uri = info.uri;
+      const formData = new FormData();
+      formData.append("file", {
+        uri,
+        type: "audio/x-wav",
+        name: "speech2text",
+      });
+      const response = await fetch(
+        "https://us-central1-chatbot-placeholder.cloudfunctions.net/audioToText",
+        {
+          method: "POST",
+          body: formData,
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      const data = await response.json();
+      const transcript = data.transcript;
+      if (transcript) {
+        showResponseTextUser(transcript);
+        Dialogflow_V2.requestQuery(
+          transcript,
+          (result) => handleResponse(result),
+          (error) => console.log(error)
+        );
+      } else showResponseText("Mình không nhận diện được giọng nói của bạn!");
+    } catch (error) {
+      console.log("There was an error reading file", error);
+      stopRecording();
+      resetRecording();
+    }
+    setIsFetching(false);
+  };
+
+  const startRecording = async () => {
+    const { status } = await Permissions.getAsync(Permissions.AUDIO_RECORDING);
+    if (status !== "granted") return;
+
+    setIsRecording(true);
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: true,
+      interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+      playsInSilentModeIOS: true,
+      shouldDuckAndroid: true,
+      interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
+      playThroughEarpieceAndroid: true,
+    });
+    const recording = new Audio.Recording();
+
+    try {
+      await recording.prepareToRecordAsync(recordingOptions);
+      await recording.startAsync();
+    } catch (error) {
+      console.log(error);
+      stopRecording();
+    }
+    setRecording(recording);
+  };
+
+  const stopRecording = async () => {
+    setIsRecording(false);
+    try {
+      await recording.stopAndUnloadAsync();
+    } catch (error) {}
+  };
+
+  const resetRecording = () => {
+    deleteRecordingFile();
+    setRecording(null);
+  };
+
+  const handleOnPressIn = () => {
+    startRecording();
+  };
+
+  const handleOnPressOut = () => {
+    stopRecording();
+    getTranscription();
+  };
+
   const {
     name,
     age,
@@ -56,14 +183,24 @@ export default function ChatScreen({ route, navigation }) {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity
-          style={{
-            marginRight: 15,
-          }}
-          onPress={() => navigation.navigate("Profile", { bmi, bmr, tdee })}
-        >
-          <Image source={require("../assets/icon_user.png")} />
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <TouchableOpacity
+            style={{
+              marginRight: 20,
+            }}
+            onPress={() => pickImageCamera()}
+          >
+            <Image source={require("../assets/icon_camera.png")} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              marginRight: 15,
+            }}
+            onPress={() => navigation.navigate("Profile", { bmi, bmr, tdee })}
+          >
+            <Image source={require("../assets/icon_user.png")} />
+          </TouchableOpacity>
+        </View>
       ),
     });
   }, [navigation]);
@@ -108,6 +245,7 @@ export default function ChatScreen({ route, navigation }) {
       image,
     };
     messagesRef.push(JSON.stringify(msg));
+    setTyping(true);
   };
 
   const postImageAPI = (image) => {
@@ -119,7 +257,7 @@ export default function ChatScreen({ route, navigation }) {
       name: "image.jpg",
     });
     axios({
-      url: "https://detectfood.duyanh4.repl.co/predict",
+      url: "https://chatbot-placeholder.df.r.appspot.com/predict",
       method: "POST",
       data: formData,
       headers: {
@@ -139,14 +277,27 @@ export default function ChatScreen({ route, navigation }) {
           showResponseText(
             `Sorry bạn :( Mình không đoán được món trong ảnh rùi!`
           );
+        setTyping(false);
       })
       .catch(function (error) {
         showResponseText("Sorry bạn :( Ảnh của bạn chưa được gửi đi");
       });
   };
 
-  const pickImage = async () => {
+  const pickImageLibary = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    if (!result.cancelled) {
+      postImageAPI(result.uri);
+    }
+  };
+
+  const pickImageCamera = async () => {
+    let result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
@@ -178,6 +329,7 @@ export default function ChatScreen({ route, navigation }) {
   const handleResponse = (result) => {
     let fulfillMessages = result.queryResult.fulfillmentMessages;
     let image, listBtn;
+    setTyping(false);
     fulfillMessages.forEach((obj) => {
       if (!obj["platform"]) {
         if (obj["payload"]) {
@@ -200,6 +352,7 @@ export default function ChatScreen({ route, navigation }) {
   const onSend = useCallback((messages = []) => {
     let message_user = messages[0];
     messagesRef.push(JSON.stringify(message_user));
+    setTyping(true);
     let text_user = message_user["text"];
     Dialogflow_V2.requestQuery(
       text_user,
@@ -207,6 +360,21 @@ export default function ChatScreen({ route, navigation }) {
       (error) => console.log(error)
     );
   }, []);
+
+  const showResponseTextUser = (text) => {
+    let msg = {
+      _id: uuid(),
+      createdAt: new Date(),
+      text,
+      user: {
+        _id: 1,
+        name: "React Native",
+        avatar: "https://i.imgur.com/Nyp4fGI.png",
+      },
+    };
+    messagesRef.push(JSON.stringify(msg));
+    setTyping(true);
+  };
 
   const onQuickReply = (replies = []) => {
     let reply = replies[0];
@@ -223,6 +391,7 @@ export default function ChatScreen({ route, navigation }) {
       text: title,
     };
     messagesRef.push(JSON.stringify(msg));
+    setTyping(true);
     Dialogflow_V2.requestQuery(
       value,
       (result) => handleResponse(result),
@@ -231,19 +400,6 @@ export default function ChatScreen({ route, navigation }) {
   };
 
   useEffect(() => {
-    (async () => {
-      if (Platform.OS !== "web") {
-        const {
-          status,
-        } = await ImagePicker.requestCameraRollPermissionsAsync();
-        if (status !== "granted") {
-          alert(
-            "Xin lỗi, mình cần quyền truy cập thư mục ảnh của bạn để có thể hoạt động đầy đủ tính năng!"
-          );
-        }
-      }
-    })();
-
     Dialogflow_V2.requestEvent(
       "WELCOME",
       {
@@ -329,8 +485,19 @@ export default function ChatScreen({ route, navigation }) {
             renderMessageText={renderMessageText}
             renderDay={renderDay}
             renderQuickReplies={renderQuickReplies}
-            onPressActionButton={pickImage}
+            isTyping={typing}
+            onPressActionButton={pickImageLibary}
           />
+          <TouchableOpacity
+            style={styles.button}
+            onPressIn={handleOnPressIn}
+            onPressOut={handleOnPressOut}
+          >
+            {isFetching && <ActivityIndicator color="#ffffff" />}
+            {!isFetching && (
+              <FontAwesome name="microphone" size={27} color="#F4F1DE" />
+            )}
+          </TouchableOpacity>
         </ImageBackground>
       </View>
     );
@@ -343,5 +510,19 @@ const styles = StyleSheet.create({
   },
   image: {
     flex: 1,
+    position: "relative",
+  },
+  button: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#A41B1F",
+    alignItems: "center",
+    width: 45,
+    height: 45,
+    borderRadius: 50,
+    marginTop: 20,
+    position: "absolute",
+    bottom: 10,
+    left: 55,
   },
 });
